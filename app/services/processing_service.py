@@ -11,7 +11,8 @@ from app.modules.scorer import aggregate_sentiment, merge_patterns
 def analyze_chunk(chunk: str) -> Dict[str, Any]:
     sentiment = rule_engine.analyze_sentiment(chunk)
     patterns = rule_engine.detect_patterns(chunk)
-    return {"sentiment": sentiment, "patterns": patterns}
+    keywords = rule_engine.extract_keywords(chunk)
+    return {"sentiment": sentiment, "patterns": patterns, "keywords": keywords}
 
 class ProcessingService:
     def __init__(self):
@@ -41,12 +42,21 @@ class ProcessingService:
         sentiments = [r["sentiment"] for r in results]
         patterns_list = [r["patterns"] for r in results]
         
+        all_keywords = []
+        for r in results:
+            all_keywords.extend(r.get("keywords", []))
+            
+        from collections import Counter
+        keyword_counts = Counter(all_keywords)
+        final_keywords = [word for word, count in keyword_counts.most_common(5)]
+        
         final_score = aggregate_sentiment(sentiments)
         final_patterns = merge_patterns(patterns_list)
         
         return {
             "sentiment_score": final_score,
             "detected_patterns": final_patterns,
+            "keywords": final_keywords,
             "chunk_count": len(chunks)
         }
 

@@ -10,8 +10,12 @@ class RuleEngine:
         self.patterns = {
             "email": re.compile(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"),
             "date": re.compile(r"\d{4}-\d{2}-\d{2}"),
-            "phone": re.compile(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b")
+            "phone": re.compile(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b"),
+            "url": re.compile(r"https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+"),
+            "currency": re.compile(r"\$\d+(?:,\d{3})*(?:\.\d{2})?")
         }
+        
+        self.stop_words = {"the", "and", "is", "in", "it", "to", "of", "for", "on", "with", "as", "at", "by", "an", "this", "that", "are", "from", "be", "or", "was", "not"}
 
     def analyze_sentiment(self, text: str) -> float:
         """
@@ -50,5 +54,19 @@ class RuleEngine:
             if matches:
                 results[name] = matches
         return results
+
+    def extract_keywords(self, text: str, top_n: int = 3) -> list:
+        if not text:
+            return []
+        
+        words = text.lower().split()
+        counts = {}
+        for word in words:
+            word = word.strip(".,!?\"'()[]{}*:;")
+            if len(word) > 3 and word not in self.stop_words and word.isalpha():
+                counts[word] = counts.get(word, 0) + 1
+                
+        sorted_words = sorted(counts.items(), key=lambda x: x[1], reverse=True)
+        return [word for word, count in sorted_words[:top_n]]
 
 rule_engine = RuleEngine()

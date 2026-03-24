@@ -30,19 +30,21 @@ async def process_text(
     # Process text
     result = await processing_service.process_text(content)
     
-    # Save to DB
+    patterns_to_save = dict(result.get("detected_patterns", {}))
+    patterns_to_save["keywords"] = result.get("keywords", [])
+
     repo = TextRepository(db)
     record = await repo.create_record(
         content=content, 
-        sentiment_score=result["sentiment_score"], 
-        detected_patterns=result["detected_patterns"]
+        sentiment_score=result.get("sentiment_score", 0.0), 
+        detected_patterns=patterns_to_save
     )
     
     return {
         "id": record.id,
         "sentiment_score": record.sentiment_score,
         "detected_patterns": record.detected_patterns,
-        "chunk_count": result["chunk_count"]
+        "chunk_count": result.get("chunk_count", 0)
     }
 
 @router.post("/process-csv")
@@ -57,13 +59,13 @@ async def process_csv(
         
     content = await file.read()
     try:
-        csv_result = await csv_service.process_csv_upload(content)
-        csv_result = await csv_service.process_csv_upload(content)
-        return Response(
-            content=csv_result, 
-            media_type="text/csv", 
-            headers={"Content-Disposition": f"attachment; filename=processed_{file.filename}"}
-        )
+        csv_string, summary, records = await csv_service.process_csv_upload(content)
+        return {
+            "csv_data": csv_string,
+            "summary": summary,
+            "records": records,
+            "filename": f"processed_{file.filename}"
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

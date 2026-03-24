@@ -1,3 +1,76 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+    :root {
+        --background: 240 10% 4%;
+        --foreground: 0 0% 98%;
+        --card: 240 10% 6%;
+        --card-foreground: 0 0% 98%;
+        --popover: 240 10% 6%;
+        --popover-foreground: 0 0% 98%;
+        --primary: 260 100% 65%;
+        --primary-foreground: 0 0% 100%;
+        --secondary: 240 10% 15%;
+        --secondary-foreground: 0 0% 98%;
+        --muted: 240 10% 15%;
+        --muted-foreground: 240 5% 65%;
+        --accent: 240 10% 15%;
+        --accent-foreground: 0 0% 98%;
+        --destructive: 0 62.8% 30.6%;
+        --destructive-foreground: 0 0% 98%;
+        --border: 240 10% 20%;
+        --input: 240 10% 20%;
+        --ring: 260 100% 65%;
+        --radius: 0.75rem;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    body {
+        @apply bg-background text-foreground font-sans antialiased min-h-screen overflow-x-hidden relative;
+        background-color: hsl(var(--background));
+        background-image: 
+            radial-gradient(circle at 15% 50%, rgba(120, 50, 255, 0.15), transparent 50%),
+            radial-gradient(circle at 85% 30%, rgba(50, 200, 255, 0.15), transparent 50%);
+        background-attachment: fixed;
+    }
+}
+
+.glass-panel {
+    @apply bg-card/40 backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.3)] transition-all duration-300 relative overflow-hidden;
+}
+.glass-panel::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-300 pointer-events-none;
+}
+.glass-panel:hover::before {
+    @apply opacity-100;
+}
+.glass-panel:hover {
+    @apply border-white/20 shadow-[0_8px_32px_rgba(120,50,255,0.15)] -translate-y-1;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #333;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
